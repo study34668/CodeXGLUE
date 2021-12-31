@@ -146,7 +146,7 @@ def train(args, train_dataset, model, tokenizer):
     train_sampler = RandomSampler(train_dataset) if args.local_rank == -1 else DistributedSampler(train_dataset)
     
     train_dataloader = DataLoader(train_dataset, sampler=train_sampler, 
-                                  batch_size=args.train_batch_size,num_workers=4,pin_memory=True)
+                                  batch_size=args.train_batch_size,num_workers=args.num_workers,pin_memory=True)
     args.max_steps=args.epoch*len( train_dataloader)
     args.save_steps=len( train_dataloader)
     args.warmup_steps=len( train_dataloader)
@@ -291,7 +291,7 @@ def evaluate(args, model, tokenizer,eval_when_training=False):
     args.eval_batch_size = args.per_gpu_eval_batch_size * max(1, args.n_gpu)
     # Note that DistributedSampler samples randomly
     eval_sampler = SequentialSampler(eval_dataset) if args.local_rank == -1 else DistributedSampler(eval_dataset)
-    eval_dataloader = DataLoader(eval_dataset, sampler=eval_sampler, batch_size=args.eval_batch_size,num_workers=4,pin_memory=True)
+    eval_dataloader = DataLoader(eval_dataset, sampler=eval_sampler, batch_size=args.eval_batch_size,num_workers=args.num_workers,pin_memory=True)
 
     # multi-gpu evaluate
     if args.n_gpu > 1 and eval_when_training is False:
@@ -501,6 +501,7 @@ def main():
     parser.add_argument('--server_ip', type=str, default='', help="For distant debugging.")
     parser.add_argument('--server_port', type=str, default='', help="For distant debugging.")
     parser.add_argument('--n_cpu', type=int, default=1, help="CPU number when CUDA is unavailable")
+    parser.add_argument('--num_workers', type=int, default=1, help="DataLoader num_workers")
     
 
     args = parser.parse_args()
