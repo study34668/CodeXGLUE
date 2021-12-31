@@ -203,11 +203,12 @@ def train(args, train_dataset, model, tokenizer):
     best_acc=0.0
     # model.resize_token_embeddings(len(tokenizer))
     model.zero_grad()
-    for idx in range(args.start_epoch, int(args.num_train_epochs)): 
+    for idx in range(args.start_epoch, int(args.num_train_epochs)):
+        logger.info("Epoch %d", idx)
         bar = train_dataloader
         tr_num=0
         train_loss=0
-        for step, batch in enumerate(bar):
+        for step, batch in tqdm(enumerate(bar)):
             inputs = batch[0].to(args.device)    
             p_inputs = batch[1].to(args.device)
             n_inputs = batch[2].to(args.device)
