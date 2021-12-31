@@ -207,7 +207,7 @@ def train(args, train_dataset, model, tokenizer):
         bar = train_dataloader
         tr_num=0
         train_loss=0
-        for step, batch in tqdm(enumerate(bar), desc="Epoch %d".format(idx)):
+        for step, batch in tqdm(enumerate(bar), desc="Epoch {}".format(idx)):
             inputs = batch[0].to(args.device)    
             p_inputs = batch[1].to(args.device)
             n_inputs = batch[2].to(args.device)
