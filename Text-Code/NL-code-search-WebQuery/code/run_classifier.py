@@ -64,7 +64,7 @@ def train(args, train_dataset, model, tokenizer):
 
     args.train_batch_size = args.per_gpu_train_batch_size * max(1, args.n_gpu)
     train_sampler = RandomSampler(train_dataset) if args.local_rank == -1 else DistributedSampler(train_dataset)
-    train_dataloader = DataLoader(train_dataset, sampler=train_sampler, batch_size=args.train_batch_size, num_workers=4, pin_memory=True)
+    train_dataloader = DataLoader(train_dataset, sampler=train_sampler, batch_size=args.train_batch_size, num_workers=args.num_workers, pin_memory=True)
 
     args.save_steps = len(train_dataloader) if args.save_steps<=0 else args.save_steps
     args.warmup_steps = len(train_dataloader) if args.warmup_steps<=0 else args.warmup_steps
@@ -417,6 +417,8 @@ def main():
                         help='path to store test result')
     parser.add_argument("--prediction_file", default='predictions.txt', type=str,
                         help='path to save predictions result, note to specify task name')
+    parser.add_argument('--n_cpu', type=int, default=1, help="CPU number when CUDA is unavailable")
+    parser.add_argument('--num_workers', type=int, default=1, help="DataLoader num_workers")
     args = parser.parse_args()
 
     # Setup distant debugging if needed
@@ -431,6 +433,7 @@ def main():
     if args.local_rank == -1 or args.no_cuda:
         device = torch.device("cuda" if torch.cuda.is_available() and not args.no_cuda else "cpu")
         args.n_gpu = torch.cuda.device_count()
+        args.n_gpu = args.n_cpu
     else:  # Initializes the distributed backend which will take care of sychronizing nodes/GPUs
         torch.cuda.set_device(args.local_rank)
         device = torch.device("cuda", args.local_rank)
