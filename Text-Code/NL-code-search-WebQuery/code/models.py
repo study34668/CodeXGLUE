@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch
 from torch.autograd import Variable
 import copy
-from transformers.modeling_bert import BertLayerNorm
+# from transformers.modeling_bert import BertLayerNorm
 import torch.nn.functional as F
 from torch.nn import CrossEntropyLoss, MSELoss
 # from transformers import (WEIGHTS_NAME, AdamW, get_linear_schedule_with_warmup,
