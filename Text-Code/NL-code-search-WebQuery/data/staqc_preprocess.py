@@ -30,8 +30,7 @@ def get_data_from_txt(txt_name, num_negative=0):
     idx = 0
     for pid in tqdm.tqdm(pids, desc='{} generate tokens'.format(txt_name)):
         title = title_data[pid]
-        code_f = io.StringIO(code_data[pid])
-        tokens = tokenize.generate_tokens(code_f.readline)
+        tokens = tokenize.generate_tokens(io.StringIO(code_data[pid]).readline)
         token_strings = []
         for token in tokens:
            token_strings.append(token.string)
@@ -70,12 +69,35 @@ save_data_to_json(train_data, 'train_{}_{}.json'.format(dataset_name, train_num_
 save_data_to_json(valid_data, 'valid_{}_{}.json'.format(dataset_name, valid_num_negative))
 save_data_to_json(test_data, 'test_{}_{}.json'.format(dataset_name, test_num_negative))
 
+# 剔除无法解析的代码
+# right_num = 0
+# wrong_num = 0
+# new_title_data = {}
+# new_code_data = {}
+# for pid in tqdm.tqdm(code_data):
+#     tokens = tokenize.generate_tokens(io.StringIO(code_data[pid]).readline)
+#     try:
+#         token_strings = []
+#         for token in tokens:
+#             token_strings.append(token.string)
+#         right_num += 1
+#         new_code_data[pid] = code_data[pid]
+#         new_title_data[pid] = title_data[pid]
+#     except Exception:
+#         wrong_num += 1
+# print(right_num)
+# print(wrong_num)
+# print(len(new_code_data))
+# print(len(new_title_data))
+# pickle.dump(new_code_data, open('qid_to_code.pickle', 'wb'))
+# pickle.dump(new_title_data, open('qid_to_title.pickle', 'wb'))
 
+# 选择训练测试数据
 # f = open('qid_to_title.pickle', 'rb')
 # data = pickle.load(f)
-# train_num = 80549
-# valid_num = 3072
-# test_num = 1673
+# train_num = 78920
+# valid_num = 3010
+# test_num = 1639
 # train_data = []
 # valid_data = []
 # test_data = []
