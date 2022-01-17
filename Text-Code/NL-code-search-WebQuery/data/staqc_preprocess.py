@@ -35,7 +35,7 @@ def get_data_from_txt(txt_name, num_negative=0):
         for token in tokens:
            token_strings.append(token.string)
         code = " ".join(token_strings)
-        data.append({'idx': idx,
+        data.append({'idx': str(idx),
                      'doc': title,
                      'code': format_str(code),
                      'label': 1})
@@ -48,7 +48,7 @@ def get_data_from_txt(txt_name, num_negative=0):
     for idx_x in tqdm.tqdm(range(length), desc='{} generate negative'.format(txt_name)):
         random_selected = random.sample(data[:idx_x] + data[idx_x+1:length], num_negative)
         for i in range(num_negative):
-            data.append({'idx': idx,
+            data.append({'idx': str(idx),
                          'doc': data[idx_x]['doc'],
                          'code': random_selected[i]['code'],
                          'label': 0})
