@@ -460,7 +460,7 @@ def main():
     checkpoint_last = os.path.join(args.output_dir, 'checkpoint-last')
     if os.path.exists(checkpoint_last) and os.listdir(checkpoint_last):
         # args.encoder_name_or_path = os.path.join(checkpoint_last, 'pytorch_model.bin')
-        args.config_name = os.path.join(checkpoint_last, 'config.json')
+        args.config_name = checkpoint_last
         idx_file = os.path.join(checkpoint_last, 'idx_file.txt')
         with open(idx_file, encoding='utf-8') as idxf:
             args.start_epoch = int(idxf.readlines()[0].strip()) + 1
