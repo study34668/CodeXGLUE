@@ -460,7 +460,7 @@ def main():
     checkpoint_last = os.path.join(args.output_dir, 'checkpoint-last')
     if os.path.exists(checkpoint_last) and os.listdir(checkpoint_last):
         # args.encoder_name_or_path = os.path.join(checkpoint_last, 'pytorch_model.bin')
-        args.config_name = checkpoint_last
+        # args.config_name = os.path.join(checkpoint_last, 'config.json')
         idx_file = os.path.join(checkpoint_last, 'idx_file.txt')
         with open(idx_file, encoding='utf-8') as idxf:
             args.start_epoch = int(idxf.readlines()[0].strip()) + 1
@@ -492,8 +492,9 @@ def main():
 
     model = Model(model, config, tokenizer, args)
 
-    if args.checkpoint_path:
-        model.load_state_dict(torch.load(os.path.join(args.checkpoint_path, 'pytorch_model.bin')))
+    if args.checkpoint_path or os.path.exists(checkpoint_last):
+        checkpoint_path = args.checkpoint_path if args.checkpoint_path else checkpoint_last
+        model.load_state_dict(torch.load(os.path.join(checkpoint_path, 'pytorch_model.bin')))
     if args.local_rank == 0:
         torch.distributed.barrier()  # End of barrier to make sure only the first process in distributed training download model & vocab
 
