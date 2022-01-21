@@ -106,7 +106,7 @@ def train(args, train_dataset, model, tokenizer):
 
     checkpoint_last = os.path.join(args.output_dir, 'checkpoint-last')
     scheduler_last = os.path.join(checkpoint_last, 'scheduler.pt')
-    if os.path.exists(scheduler_last):
+    if (not args.re_schdule) and os.path.exists(scheduler_last):
         scheduler.load_state_dict(torch.load(scheduler_last))
 
     # Train!
@@ -435,6 +435,7 @@ def main():
                         help='path to save predictions result, note to specify task name')
     parser.add_argument('--n_cpu', type=int, default=1, help="CPU number when CUDA is unavailable")
     parser.add_argument('--num_workers', type=int, default=1, help="DataLoader num_workers")
+    parser.add_argument('--re_schedule', type=bool, default=False, help="use True to set epoch and step to zero")
     args = parser.parse_args()
 
     # Setup distant debugging if needed
@@ -474,7 +475,7 @@ def main():
     args.start_epoch = 0
     args.start_step = 0
     checkpoint_last = os.path.join(args.output_dir, 'checkpoint-last')
-    if os.path.exists(checkpoint_last) and os.listdir(checkpoint_last):
+    if (not args.re_schedule) and os.path.exists(checkpoint_last) and os.listdir(checkpoint_last):
         # args.encoder_name_or_path = os.path.join(checkpoint_last, 'pytorch_model.bin')
         # args.config_name = os.path.join(checkpoint_last, 'config.json')
         idx_file = os.path.join(checkpoint_last, 'idx_file.txt')
