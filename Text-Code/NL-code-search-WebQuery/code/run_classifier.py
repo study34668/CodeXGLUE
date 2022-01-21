@@ -129,6 +129,18 @@ def train(args, train_dataset, model, tokenizer):
     model.train()
     logger.info(model)
 
+    # load the best results
+    checkpoint_best_aver = os.path.join(args.output_dir, 'checkpoint-best-aver')
+    best_results_file = os.path.join(checkpoint_best_aver, 'best_results_file.txt')
+    if os.path.exists(best_results_file):
+        with open(best_results_file, encoding='utf-8') as brf:
+            for line in brf.readlines():
+                kv = line.strip().split(' ')
+                best_results[kv[0]] = float(kv[1])
+    logger.info("Best Results:")
+    for key, value in best_results.items():
+        logger.info("  %s = %s", key, round(value, 4))
+
     for idx in train_iterator:
         bar = tqdm(enumerate(train_dataloader))
         tr_num=0
@@ -200,6 +212,10 @@ def train(args, train_dataset, model, tokenizer):
                             torch.save(optimizer.state_dict(), os.path.join(output_dir, "optimizer.pt"))
                             torch.save(scheduler.state_dict(), os.path.join(output_dir, "scheduler.pt"))
                             logger.info("Saving optimizer and scheduler states to %s", output_dir)
+                            with open(best_results_file, 'w', encoding='utf-8') as brf:
+                                for key, value in best_results.items():
+                                    brf.write(key + ' ' + str(value) + '\n')
+                            logger.info("Saving best results to %s", best_results_file)
 
                     if args.local_rank == -1:
                         checkpoint_prefix = 'checkpoint-last'
@@ -236,7 +252,7 @@ def evaluate(args, model, tokenizer,eval_when_training=False):
     args.eval_batch_size = args.per_gpu_eval_batch_size * max(1, args.n_gpu)
     # Note that DistributedSampler samples randomly
     eval_sampler = SequentialSampler(eval_dataset) if args.local_rank == -1 else DistributedSampler(eval_dataset)
-    eval_dataloader = DataLoader(eval_dataset, sampler=eval_sampler, batch_size=args.eval_batch_size, num_workers=4, pin_memory=True)
+    eval_dataloader = DataLoader(eval_dataset, sampler=eval_sampler, batch_size=args.eval_batch_size, num_workers=args.num_workers, pin_memory=True)
 
     # multi-gpu evaluate
     if args.n_gpu > 1 and eval_when_training is False:
