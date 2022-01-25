@@ -150,7 +150,7 @@ def train(args, train_dataset, model, tokenizer):
             code_inputs = batch[0].to(args.device)
             nl_inputs = batch[1].to(args.device)
             labels = batch[2].to(args.device)
-            loss, predictions = model(code_inputs, nl_inputs, labels)
+            _, loss, predictions = model(code_inputs, nl_inputs, labels)
 
             if args.n_gpu > 1:
                 loss = loss.mean()  # mean() to average on multi-gpu parallel training
@@ -228,7 +228,7 @@ def train(args, train_dataset, model, tokenizer):
 
                         idx_file = os.path.join(output_dir, 'idx_file.txt')
                         with open(idx_file, 'w', encoding='utf-8') as idxf:
-                            idxf.write(str(args.start_epoch + idx) + '\n')
+                            idxf.write(str(idx) + '\n')
                         logger.info("Saving model checkpoint to %s", output_dir)
                         torch.save(optimizer.state_dict(), os.path.join(output_dir, "optimizer.pt"))
                         torch.save(scheduler.state_dict(), os.path.join(output_dir, "scheduler.pt"))
@@ -272,7 +272,7 @@ def evaluate(args, model, tokenizer,eval_when_training=False):
         nl_inputs = batch[1].to(args.device)
         labels = batch[2].to(args.device)
         with torch.no_grad():
-            lm_loss, predictions = model(code_inputs, nl_inputs, labels)
+            _, lm_loss, predictions = model(code_inputs, nl_inputs, labels)
             # lm_loss,code_vec,nl_vec = model(code_inputs,nl_inputs)
             eval_loss += lm_loss.mean().item()
             all_predictions.append(predictions.cpu())
@@ -311,21 +311,24 @@ def test(args, model, tokenizer):
     logger.info("  Batch size = %d", args.eval_batch_size)
 
     nb_eval_steps = 0
+    all_logits = []
     all_predictions = []
     for batch in eval_dataloader:
         code_inputs = batch[0].to(args.device)
         nl_inputs = batch[1].to(args.device)
         labels = batch[2].to(args.device)
         with torch.no_grad():
-            _, predictions = model(code_inputs, nl_inputs, labels)
+            logits, _, predictions = model(code_inputs, nl_inputs, labels)
+            all_logits.append(logits.cpu())
             all_predictions.append(predictions.cpu())
         nb_eval_steps += 1
+    all_logits = torch.cat(all_logits, 0).squeeze().numpy()
     all_predictions = torch.cat(all_predictions, 0).squeeze().numpy()
 
     logger.info("***** Running Test *****")
     with open(args.prediction_file,'w') as f:
-        for example, pred in zip(eval_dataset.examples, all_predictions.tolist()):
-            f.write(example.idx+'\t'+str(int(pred))+'\n')
+        for example, logit, pred in zip(eval_dataset.examples, all_logits.tolist(), all_predictions.tolist()):
+            f.write(example.idx+'\t'+str(float(logit))+'\t'+str(int(pred))+'\n')
 
 
 def main():
@@ -433,6 +436,7 @@ def main():
                         help='path to store test result')
     parser.add_argument("--prediction_file", default='predictions.txt', type=str,
                         help='path to save predictions result, note to specify task name')
+
     parser.add_argument('--n_cpu', type=int, default=1, help="CPU number when CUDA is unavailable")
     parser.add_argument('--num_workers', type=int, default=1, help="DataLoader num_workers")
     parser.add_argument('--re_schedule', type=bool, default=False, help="use True to set epoch and step to zero")

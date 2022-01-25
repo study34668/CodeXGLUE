@@ -40,5 +40,5 @@ class Model(PreTrainedModel):
         logits = self.mlp(torch.cat((nl_vec, code_vec, nl_vec-code_vec, nl_vec*code_vec), 1))
         loss = self.loss_func(logits, labels.unsqueeze(1).float())
         predictions = (logits > 0.5).int()  # (Batch, )
-        return loss, predictions
+        return logits, loss, predictions
 
