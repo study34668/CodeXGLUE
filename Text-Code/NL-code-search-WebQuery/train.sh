@@ -19,4 +19,5 @@ nohup python code/run_classifier.py \
 	--n_cpu 1 \
 	--num_workers 0 \
 	--seed 123456 2>&1 | tee log/train.log &
+
 jobs -l > log/pid.log

@@ -37,6 +37,7 @@ def get_data_from_txt(txt_name, num_negative=0):
         code = " ".join(token_strings)
         data.append({'idx': str(idx),
                      'doc': title,
+                     'pid': pid,
                      'code': format_str(code),
                      'label': 1})
         idx += 1
@@ -50,6 +51,7 @@ def get_data_from_txt(txt_name, num_negative=0):
         for i in range(num_negative):
             data.append({'idx': str(idx),
                          'doc': data[idx_x]['doc'],
+                         'pid': random_selected[i]['pid'],
                          'code': random_selected[i]['code'],
                          'label': 0})
             idx += 1
@@ -66,9 +68,11 @@ random.seed(1)
 train_data = get_data_from_txt('{}_train.txt'.format(dataset_name), train_num_negative)
 valid_data = get_data_from_txt('{}_valid.txt'.format(dataset_name), valid_num_negative)
 test_data = get_data_from_txt('{}_test.txt'.format(dataset_name), test_num_negative)
+query_data = get_data_from_txt('{}_query.txt'.format(dataset_name), 0)
 save_data_to_json(train_data, 'train_{}_{}.json'.format(dataset_name, train_num_negative))
 save_data_to_json(valid_data, 'valid_{}_{}.json'.format(dataset_name, valid_num_negative))
 save_data_to_json(test_data, 'test_{}_{}.json'.format(dataset_name, test_num_negative))
+save_data_to_json(query_data, 'test_{}_0.json'.format(dataset_name))
 
 # 剔除无法解析的代码
 # right_num = 0
@@ -113,9 +117,12 @@ save_data_to_json(test_data, 'test_{}_{}.json'.format(dataset_name, test_num_neg
 # train_f = open('staqc_train.txt', 'w')
 # valid_f = open('staqc_valid.txt', 'w')
 # test_f = open('staqc_test.txt', 'w')
+# query_f = open('staqc_query.txt', 'w')
 # for pid in train_data:
 #     train_f.write(str(pid) + '\n')
 # for pid in valid_data:
 #     valid_f.write(str(pid) + '\n')
 # for pid in test_data:
 #     test_f.write(str(pid) + '\n')
+# for pid in data:
+#     query_f.write(str(pid) + '\n')
