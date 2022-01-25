@@ -11,9 +11,9 @@ def main():
                         help="An optional input evaluation data file to evaluate the perplexity on (a text file).")
     parser.add_argument('--output_test_file', default=None, type=str,
                         help="loc to store generated test file")
-    parser.add_argument("--prepare_test_json", default=False, type=bool,
+    parser.add_argument("--prepare_test_json", action='store_true',
                         help="gen test json for run_classifier")
-    parser.add_argument("--output_answer", default=False, type=bool,
+    parser.add_argument("--output_answer", action='store_true',
                         help="get answer from prediction.txt")
     parser.add_argument('--query', default='', type=str, help="query text")
     args = parser.parse_args()
