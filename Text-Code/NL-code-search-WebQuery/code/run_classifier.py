@@ -106,7 +106,7 @@ def train(args, train_dataset, model, tokenizer):
 
     checkpoint_last = os.path.join(args.output_dir, 'checkpoint-last')
     scheduler_last = os.path.join(checkpoint_last, 'scheduler.pt')
-    if (not args.re_schdule) and os.path.exists(scheduler_last):
+    if (not args.re_schedule) and os.path.exists(scheduler_last):
         scheduler.load_state_dict(torch.load(scheduler_last))
 
     # Train!
