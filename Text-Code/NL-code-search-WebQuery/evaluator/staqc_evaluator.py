@@ -19,7 +19,7 @@ def read_predictions(filename):
     with open(filename, 'r', encoding='utf-8') as f:
         for line in f.readlines():
             line = line.strip()
-            predictions[line.split('\t')[0]] = int(line.split('\t')[1])
+            predictions[line.split('\t')[0]] = int(line.split('\t')[2])
     return predictions
 
 
