@@ -4,6 +4,10 @@ import os
 import pickle
 
 
+def getLogit(item):
+    return item['logit']
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_dir", default=None, type=str, required=True,
@@ -34,27 +38,29 @@ def main():
     if args.output_answer:
         test_data_path = os.path.join(args.data_dir, args.test_file)
         qid_to_code_data_path = os.path.join(args.data_dir, 'qid_to_code.pickle')
+        code_data = pickle.load(open(qid_to_code_data_path, 'rb'))
 
-        best_idx = ""
-        best_logit = 0.0
+        idx_pid_map = {}
+        with open(test_data_path, 'r') as f:
+            data = json.load(f)
+            for js in data:
+                idx_pid_map[js['idx']] = js['pid']
+
+        list = []
         with open(args.prediction_file, 'r') as f:
             for line in f.readlines():
                 pred = line.strip().split('\t')
                 idx, logit = pred[0], float(pred[1])
-                if logit > best_logit:
-                    best_logit = logit
-                    best_idx = idx
+                list.append({
+                    'pid': idx_pid_map[idx],
+                    'logit': logit
+                })
 
-        best_pid = -1
-        with open(test_data_path, 'r') as f:
-            data = json.load(f)
-            for js in data:
-                if js['idx'] == best_idx:
-                    best_pid = js['pid']
-
-        code_data = pickle.load(open(qid_to_code_data_path, 'rb'))
-        print(code_data[best_pid])
-
+        list.sort(reverse=True, key=getLogit)
+        for i in range(10):
+            print("******" + str(list[i]['logit']) + "******")
+            print(code_data[list[i]['pid']])
+            print("******************************")
 
 if __name__ == "__main__":
     main()
