@@ -313,7 +313,7 @@ def test(args, model, tokenizer):
     nb_eval_steps = 0
     all_logits = []
     all_predictions = []
-    for batch in eval_dataloader:
+    for batch in tqdm(eval_dataloader):
         code_inputs = batch[0].to(args.device)
         nl_inputs = batch[1].to(args.device)
         labels = batch[2].to(args.device)
