@@ -39,7 +39,7 @@ def main():
         best_logit = 0.0
         with open(args.prediction_file, 'r') as f:
             for line in f.readlines():
-                pred = line.strip().split(' ')
+                pred = line.strip().split('\t')
                 idx, logit = pred[0], float(pred[1])
                 if logit > best_logit:
                     best_logit = logit
