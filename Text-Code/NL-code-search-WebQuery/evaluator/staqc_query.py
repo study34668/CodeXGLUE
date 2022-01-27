@@ -14,7 +14,7 @@ def main():
                         help="The input data dir. Should contain the .tsv files (or other data files) for the task.")
     parser.add_argument("--test_file", default=None, type=str, required=True,
                         help="An optional input evaluation data file to evaluate the perplexity on (a text file).")
-    parser.add_argument('--output_test_file', default='test_staqc_query.json', type=str,
+    parser.add_argument('--output_test_file', default='query_staqc_doc.json', type=str,
                         help="loc to store generated test file")
     parser.add_argument("--prediction_file", default='evaluator/staqc_query_predictions.txt', type=str,
                         help='path to save predictions result, note to specify task name')
@@ -61,6 +61,7 @@ def main():
             print("******" + str(list[i]['logit']) + "******")
             print(code_data[list[i]['pid']])
             print("******************************")
+
 
 if __name__ == "__main__":
     main()

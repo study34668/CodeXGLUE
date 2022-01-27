@@ -9,8 +9,8 @@ dataset_name = 'staqc'
 title_data = pickle.load(open('qid_to_title.pickle', 'rb'))
 code_data = pickle.load(open('qid_to_code.pickle', 'rb'))
 train_num_negative = 3
-valid_num_negative = 1
-test_num_negative = 1
+valid_num_negative = 0
+test_num_negative = 0
 
 
 def format_str(string):
@@ -72,7 +72,7 @@ query_data = get_data_from_txt('{}_query.txt'.format(dataset_name), 0)
 save_data_to_json(train_data, 'train_{}_{}.json'.format(dataset_name, train_num_negative))
 save_data_to_json(valid_data, 'valid_{}_{}.json'.format(dataset_name, valid_num_negative))
 save_data_to_json(test_data, 'test_{}_{}.json'.format(dataset_name, test_num_negative))
-save_data_to_json(query_data, 'test_{}_0.json'.format(dataset_name))
+save_data_to_json(query_data, 'query_{}_0.json'.format(dataset_name))
 
 # 剔除无法解析的代码
 # right_num = 0
