@@ -6,8 +6,8 @@ nohup python code/run_classifier.py \
 	--train_file train_staqc_3.json \
 	--dev_file valid_staqc_0.json \
 	--max_seq_length 200 \
-	--per_gpu_train_batch_size 16 \
-	--per_gpu_eval_batch_size 16 \
+	--per_gpu_train_batch_size 8 \
+	--per_gpu_eval_batch_size 8 \
 	--learning_rate 1e-5 \
 	--num_train_epochs 5 \
 	--gradient_accumulation_steps 1 \
