@@ -438,7 +438,7 @@ def main():
                         help='path to save predictions result, note to specify task name')
 
     parser.add_argument('--n_cpu', type=int, default=1, help="CPU number when CUDA is unavailable")
-    parser.add_argument('--num_workers', type=int, default=1, help="DataLoader num_workers")
+    parser.add_argument('--num_workers', type=int, default=0, help="DataLoader num_workers")
     parser.add_argument('--re_schedule', type=bool, default=False, help="use True to set epoch and step to zero")
     args = parser.parse_args()
 

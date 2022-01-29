@@ -8,7 +8,7 @@ import tqdm
 dataset_name = 'staqc'
 title_data = pickle.load(open('qid_to_title.pickle', 'rb'))
 code_data = pickle.load(open('qid_to_code.pickle', 'rb'))
-train_num_negative = 3
+train_num_negative = 1
 valid_num_negative = 0
 test_num_negative = 0
 

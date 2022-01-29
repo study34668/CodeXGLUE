@@ -3,15 +3,16 @@ nohup python code/run_classifier.py \
 	--do_train \
 	--do_eval \
 	--eval_all_checkpoints \
-	--train_file train_staqc_3.json \
+	--train_file train_staqc_1.json \
 	--dev_file valid_staqc_0.json \
 	--max_seq_length 200 \
 	--per_gpu_train_batch_size 8 \
 	--per_gpu_eval_batch_size 8 \
-	--learning_rate 1e-5 \
+	--learning_rate 5e-5 \
 	--num_train_epochs 5 \
 	--gradient_accumulation_steps 1 \
 	--warmup_steps 1000 \
+	--save_steps 1000 \
 	--evaluate_during_training \
 	--data_dir ./data/ \
 	--output_dir ./model_staqc \
