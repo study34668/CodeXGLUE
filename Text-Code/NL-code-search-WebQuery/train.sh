@@ -3,7 +3,7 @@ nohup python code/run_classifier.py \
 	--do_train \
 	--do_eval \
 	--eval_all_checkpoints \
-	--train_file train_staqc_1.json \
+	--train_file train_staqc_3.json \
 	--dev_file valid_staqc_0.json \
 	--max_seq_length 200 \
 	--per_gpu_train_batch_size 8 \
