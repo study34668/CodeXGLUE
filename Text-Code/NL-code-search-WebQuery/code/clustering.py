@@ -61,7 +61,8 @@ def clustering(args, model, tokenizer):
         code_inputs = batch[0].to(args.device)
         nl_inputs = batch[1].to(args.device)
         labels = batch[2].to(args.device)
-        idxes = batch[3].to(args.device)
+        idxes = batch[3]
+        print(idxes)
         with torch.no_grad():
             code_vec, _ = model(code_inputs, nl_inputs, labels, return_vec=True)
             all_code_vec.append(code_vec.cpu())

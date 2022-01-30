@@ -105,7 +105,7 @@ class TextDataset(Dataset):
         return torch.tensor(self.examples[i].code_ids), \
                torch.tensor(self.examples[i].nl_ids), \
                torch.tensor(self.examples[i].label), \
-               torch.tensor(self.examples[i].idx)
+               self.examples[i].idx
 
 
 
