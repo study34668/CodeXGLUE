@@ -83,6 +83,9 @@ class TextDataset(Dataset):
         if self.type == 'test':
             for js in data:
                 js['label'] = 0
+        if self.type == 'clustering':
+            for js in data:
+                js['doc'] = ''
         for js in data:
             self.examples.append(convert_examples_to_features(js, tokenizer, args))
         if 'train' in file_path:
@@ -100,8 +103,9 @@ class TextDataset(Dataset):
     def __getitem__(self, i):
         """ return both tokenized code ids and nl ids and label"""
         return torch.tensor(self.examples[i].code_ids), \
-               torch.tensor(self.examples[i].nl_ids),\
-               torch.tensor(self.examples[i].label)
+               torch.tensor(self.examples[i].nl_ids), \
+               torch.tensor(self.examples[i].label), \
+               torch.tensor(self.examples[i].idx)
 
 
 
