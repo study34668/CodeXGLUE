@@ -6,6 +6,7 @@ import logging
 import os
 import random
 from sklearn.cluster import KMeans
+from sklearn import metrics
 
 import numpy as np
 import torch
@@ -56,21 +57,26 @@ def clustering(args, model, tokenizer):
 
     # Eval!
     model.eval()
+    all_idx = []
     all_code_vec = []
     for batch in dataloader:
         code_inputs = batch[0].to(args.device)
         nl_inputs = batch[1].to(args.device)
         labels = batch[2].to(args.device)
         idxes = batch[3]
+        for idx in idxes:
+            all_idx.append(idx)
         with torch.no_grad():
             code_vec, _ = model(code_inputs, nl_inputs, labels, return_vec=True)
             all_code_vec.append(code_vec.cpu())
     all_code_vec = torch.cat(all_code_vec, 0).squeeze().numpy()
 
-    km = KMeans(n_clusters=3)
-    result = km.fit_predict(all_code_vec)
+    for k in range(3, 8):
+        km = KMeans(n_clusters=k)
+        y_pred = km.fit_predict(all_code_vec)
+        print(metrics.calinski_harabasz_score(all_code_vec, y_pred))
 
-    return result
+    return {}
 
 
 def main():
