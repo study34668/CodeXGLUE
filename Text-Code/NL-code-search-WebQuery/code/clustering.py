@@ -59,7 +59,7 @@ def clustering(args, model, tokenizer):
     model.eval()
     all_idx = []
     all_code_vec = []
-    for batch in dataloader:
+    for batch in tqdm(dataloader):
         code_inputs = batch[0].to(args.device)
         nl_inputs = batch[1].to(args.device)
         labels = batch[2].to(args.device)
@@ -71,10 +71,10 @@ def clustering(args, model, tokenizer):
             all_code_vec.append(code_vec.cpu())
     all_code_vec = torch.cat(all_code_vec, 0).squeeze().numpy()
 
-    for k in range(3, 8):
+    for k in range(2, 16):
         km = KMeans(n_clusters=k)
         y_pred = km.fit_predict(all_code_vec)
-        print(metrics.calinski_harabasz_score(all_code_vec, y_pred))
+        print("k:{} score:{}".format(k, metrics.calinski_harabasz_score(all_code_vec, y_pred)))
 
     return {}
 
