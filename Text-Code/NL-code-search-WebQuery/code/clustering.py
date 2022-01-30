@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import argparse
 import glob
+import json
 import logging
 import os
 import random
@@ -71,12 +72,29 @@ def clustering(args, model, tokenizer):
             all_code_vec.append(code_vec.cpu())
     all_code_vec = torch.cat(all_code_vec, 0).squeeze().numpy()
 
+    max_score = 0.0
+    best_k = 0
     for k in range(2, 16):
         km = KMeans(n_clusters=k)
         y_pred = km.fit_predict(all_code_vec)
-        print("k:{} score:{}".format(k, metrics.calinski_harabasz_score(all_code_vec, y_pred)))
+        score = metrics.calinski_harabasz_score(all_code_vec, y_pred)
+        print("k:{} score:{}".format(k, score))
+        if score > max_score:
+            max_score = score
+            best_k = k
 
-    return {}
+    results = []
+    km = KMeans(n_clusters=best_k)
+    km_model = km.fit(all_code_vec)
+    for i in range(best_k):
+        results.append({
+            'cluster_center': km_model.cluster_centers_[i],
+            'idxes': []
+        })
+    for i, label in enumerate(km_model.labels_):
+        results[label]['idxes'].append(all_idx[i])
+
+    return results
 
 
 def main():
@@ -214,7 +232,9 @@ def main():
         tokenizer = tokenizer.from_pretrained(model_dir)
         model.to(args.device)
         results = clustering(args, model, tokenizer)
-        print(results)
+        output_path = os.path.join(args.output_dir, 'cluster.json')
+        with open(output_path, 'w') as f:
+            json.dump(results, f)
 
 
 if __name__ == "__main__":
