@@ -74,7 +74,7 @@ def clustering(args, model, tokenizer):
 
     max_score = 0.0
     best_k = 0
-    for k in range(2, 16):
+    for k in range(32, 64):
         km = KMeans(n_clusters=k)
         y_pred = km.fit_predict(all_code_vec)
         score = metrics.calinski_harabasz_score(all_code_vec, y_pred)
@@ -88,7 +88,7 @@ def clustering(args, model, tokenizer):
     km_model = km.fit(all_code_vec)
     for i in range(best_k):
         results.append({
-            'cluster_center': km_model.cluster_centers_[i],
+            'cluster_center': km_model.cluster_centers_[i].tolist(),
             'idxes': []
         })
     for i, label in enumerate(km_model.labels_):
