@@ -11,8 +11,8 @@ nohup python code/run_classifier.py \
 	--learning_rate 5e-5 \
 	--num_train_epochs 10 \
 	--gradient_accumulation_steps 1 \
-	--warmup_steps 1000 \
-	--save_steps 1000 \
+	--warmup_steps 2000 \
+	--save_steps 2000 \
 	--evaluate_during_training \
 	--data_dir ./data/ \
 	--output_dir ./model_staqc \
