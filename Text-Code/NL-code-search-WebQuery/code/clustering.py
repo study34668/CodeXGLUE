@@ -5,6 +5,7 @@ import glob
 import json
 import logging
 import os
+import pickle
 import random
 from sklearn.cluster import KMeans
 from sklearn import metrics
@@ -25,13 +26,17 @@ from transformers import (WEIGHTS_NAME, get_linear_schedule_with_warmup, AdamW,
                           RobertaTokenizer)
 
 from models import Model
-from utils import acc_and_f1, TextDataset
+from utils import acc_and_f1, TextDataset, convert_examples_to_features
 import multiprocessing
 cpu_cont = multiprocessing.cpu_count()
 
 logger = logging.getLogger(__name__)
 
 MODEL_CLASSES = {'roberta': (RobertaConfig, RobertaModel, RobertaTokenizer)}
+
+
+def get_logit(item):
+    return item['logit']
 
 
 def set_seed(seed=42):
@@ -97,6 +102,50 @@ def clustering(args, model, tokenizer):
     return results
 
 
+def prepare_test_json(args, model, tokenizer):
+    output_path = os.path.join(args.output_dir, 'cluster.json')
+    with open(output_path, 'r') as f:
+        results = json.load(f)
+
+    feat = convert_examples_to_features({
+        'label': 0, 'code': '',
+        'doc': args.query
+    }, tokenizer, args)
+    label = torch.tensor(feat.label)
+    _, nl_vec = model(
+        torch.tensor(feat.code_ids),
+        torch.tensor(feat.nl_ids),
+        torch.tensor(feat.label),
+        return_vec=True
+    )
+
+    best_idx = -1
+    best_logit = 0.0
+    for idx, result in enumerate(results):
+        code_vec = torch.tensor(result['cluster_center'])
+        logits, _, _ = model(code_vec, nl_vec, label, use_input=True)
+        logit = logits.squeeze().numpy().tolist()[0]
+        print(logit)
+        if logit > best_logit:
+            best_logit = logit
+            best_idx = idx
+    idx_map = {}
+    for idx in results[best_idx]['idxes']:
+        idx_map[idx] = True
+
+    test_data_path = os.path.join(args.data_dir, args.test_file)
+    output_test_file_path = os.path.join(args.data_dir, args.output_test_file)
+    output_js = []
+    with open(test_data_path, 'r') as f:
+        data = json.load(f)
+    for js in data:
+        if idx_map[js['idx']]:
+            js['doc'] = args.query
+            output_js.append(js)
+    with open(output_test_file_path, 'w') as f:
+        json.dump(output_js, f)
+
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -109,6 +158,8 @@ def main():
                         help='model for prediction')
     parser.add_argument("--clustering_file", default=None, type=str, required=True,
                         help="An input evaluation data file to evaluate the perplexity on (a text file).")
+    parser.add_argument("--test_file", default=None, type=str, required=True,
+                        help="An optional input evaluation data file to evaluate the perplexity on (a text file).")
 
     ## Other parameters
     parser.add_argument("--model_type", default="roberta", type=str,
@@ -169,9 +220,20 @@ def main():
                              "See details at https://nvidia.github.io/apex/amp.html")
     parser.add_argument("--local_rank", type=int, default=-1,
                         help="For distributed training: local_rank")
-
     parser.add_argument('--n_cpu', type=int, default=1, help="CPU number when CUDA is unavailable")
     parser.add_argument('--num_workers', type=int, default=0, help="DataLoader num_workers")
+
+    parser.add_argument('--output_test_file', default='query_staqc_doc.json', type=str,
+                        help="loc to store generated test file")
+    parser.add_argument("--prediction_file", default='evaluator/staqc_query_predictions.txt', type=str,
+                        help='path to save predictions result, note to specify task name')
+    parser.add_argument('--do_clustering', action='store_true')
+    parser.add_argument("--prepare_test_json", action='store_true',
+                        help="gen test json for run_classifier")
+    parser.add_argument("--output_answer", action='store_true',
+                        help="get answer from prediction.txt")
+    parser.add_argument('--query', default='', type=str, help="query text")
+
     args = parser.parse_args()
 
     # Setup CUDA, GPU & distributed training
@@ -225,8 +287,8 @@ def main():
 
     logger.info("Training/evaluation parameters %s", args)
 
-    # Evaluation
-    if args.local_rank in [-1, 0]:
+    # Clustering
+    if args.do_clustering:
         model_dir = os.path.join(args.output_dir, args.pred_model_dir)
         model.load_state_dict(torch.load(os.path.join(model_dir, 'pytorch_model.bin')))
         tokenizer = tokenizer.from_pretrained(model_dir)
@@ -235,6 +297,40 @@ def main():
         output_path = os.path.join(args.output_dir, 'cluster.json')
         with open(output_path, 'w') as f:
             json.dump(results, f)
+
+    if args.prepare_test_json:
+        model_dir = os.path.join(args.output_dir, args.pred_model_dir)
+        model.load_state_dict(torch.load(os.path.join(model_dir, 'pytorch_model.bin')))
+        tokenizer = tokenizer.from_pretrained(model_dir)
+        model.to(args.device)
+        prepare_test_json(args, model, tokenizer)
+
+    if args.output_answer:
+        test_data_path = os.path.join(args.data_dir, args.test_file)
+        qid_to_code_data_path = os.path.join(args.data_dir, 'qid_to_code.pickle')
+        code_data = pickle.load(open(qid_to_code_data_path, 'rb'))
+
+        idx_pid_map = {}
+        with open(test_data_path, 'r') as f:
+            data = json.load(f)
+            for js in data:
+                idx_pid_map[js['idx']] = js['pid']
+
+        list = []
+        with open(args.prediction_file, 'r') as f:
+            for line in f.readlines():
+                pred = line.strip().split('\t')
+                idx, logit = pred[0], float(pred[1])
+                list.append({
+                    'pid': idx_pid_map[idx],
+                    'logit': logit
+                })
+
+        list.sort(reverse=True, key=get_logit)
+        for i in range(10):
+            print("******" + str(list[i]['logit']) + "******")
+            print(code_data[list[i]['pid']])
+            print("******************************")
 
 
 if __name__ == "__main__":

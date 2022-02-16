@@ -28,14 +28,18 @@ class Model(PreTrainedModel):
         self.loss_func = nn.BCELoss()
         self.args = args
 
-    def forward(self, code_inputs, nl_inputs, labels, return_vec=False):
-        bs = code_inputs.shape[0]
-        inputs = torch.cat((code_inputs, nl_inputs), 0)
-        outputs = self.encoder(inputs, attention_mask=inputs.ne(1))[1]
-        code_vec = outputs[:bs]
-        nl_vec = outputs[bs:]
-        if return_vec:
-            return code_vec, nl_vec
+    def forward(self, code_inputs, nl_inputs, labels, return_vec=False, use_input=False):
+        if not use_input:
+            bs = code_inputs.shape[0]
+            inputs = torch.cat((code_inputs, nl_inputs), 0)
+            outputs = self.encoder(inputs, attention_mask=inputs.ne(1))[1]
+            code_vec = outputs[:bs]
+            nl_vec = outputs[bs:]
+            if return_vec:
+                return code_vec, nl_vec
+        else:
+            code_vec = code_inputs
+            nl_vec = nl_inputs
 
         logits = self.mlp(torch.cat((nl_vec, code_vec, nl_vec-code_vec, nl_vec*code_vec), 1))
         loss = self.loss_func(logits, labels.unsqueeze(1).float())
