@@ -1,3 +1,5 @@
+echo "question: $1"
+
 python code/clustering.py \
   --model_type roberta \
   --encoder_name_or_path microsoft/codebert-base \
@@ -9,7 +11,7 @@ python code/clustering.py \
 	--test_file query_staqc_0.json \
 	--output_test_file query_staqc_doc.json \
 	--prepare_test_json \
-	--query "your question"
+	--query "$1"
 
 python code/run_classifier.py \
 	--model_type roberta \
