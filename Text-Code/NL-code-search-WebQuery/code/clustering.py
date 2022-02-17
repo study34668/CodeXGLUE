@@ -108,7 +108,7 @@ def prepare_test_json(args, model, tokenizer):
         results = json.load(f)
 
     feat = convert_examples_to_features({
-        'label': 0, 'code': '',
+        'label': 0, 'code': '', 'idx': '',
         'doc': args.query
     }, tokenizer, args)
     label = torch.tensor(feat.label)
