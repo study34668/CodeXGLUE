@@ -156,8 +156,6 @@ def main():
                         help="The output directory where the model predictions and checkpoints will be written.")
     parser.add_argument("--pred_model_dir", default=None, type=str, required=True,
                         help='model for prediction')
-    parser.add_argument("--clustering_file", default=None, type=str, required=True,
-                        help="An input evaluation data file to evaluate the perplexity on (a text file).")
 
     ## Other parameters
     parser.add_argument("--model_type", default="roberta", type=str,
@@ -221,6 +219,8 @@ def main():
     parser.add_argument('--n_cpu', type=int, default=1, help="CPU number when CUDA is unavailable")
     parser.add_argument('--num_workers', type=int, default=0, help="DataLoader num_workers")
 
+    parser.add_argument("--clustering_file", default=None, type=str,
+                        help="An input evaluation data file to evaluate the perplexity on (a text file).")
     parser.add_argument("--test_file", default=None, type=str,
                         help="An optional input evaluation data file to evaluate the perplexity on (a text file).")
     parser.add_argument('--output_test_file', default='query_staqc_doc.json', type=str,
