@@ -122,7 +122,7 @@ def prepare_test_json(args, model, tokenizer):
         code_vec = torch.tensor(result['cluster_center']).unsqueeze(0)
         with torch.no_grad():
             logits, _, _ = model(code_vec, nl_vec, labels, use_input=True)
-            logit = float(logits.squeeze().numpy().tolist()[0])
+            logit = float(logits.squeeze().numpy().tolist())
             print(logit)
         if logit > best_logit:
             best_logit = logit
