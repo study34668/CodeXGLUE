@@ -72,12 +72,29 @@ def convert_examples_to_features(js, tokenizer, args):
     return InputFeatures(code_tokens, code_ids, nl_tokens, nl_ids, label, js['idx'])
 
 
+class SingleDocDataset(Dataset):
+    def __init__(self, tokenizer, args, doc):
+        # json: dict: idx, query, doc, code
+        self.example = convert_examples_to_features({
+            'label': 0, 'code': '', 'idx': '', 'doc': doc
+        }, tokenizer, args)
+
+    def __len__(self):
+        return 1
+
+    def __getitem__(self, i):
+        """ return both tokenized code ids and nl ids and label"""
+        return torch.tensor(self.example.code_ids), \
+               torch.tensor(self.example.nl_ids), \
+               torch.tensor(self.example.label), \
+               self.example.idx
+
+
 class TextDataset(Dataset):
     def __init__(self, tokenizer, args, file_path=None, type=None):
         # json file: dict: idx, query, doc, code
         self.examples = []
         self.type = type
-        data=[]
         with open(file_path, 'r') as f:
             data = json.load(f)
         if self.type == 'test':

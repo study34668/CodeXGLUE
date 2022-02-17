@@ -26,7 +26,7 @@ from transformers import (WEIGHTS_NAME, get_linear_schedule_with_warmup, AdamW,
                           RobertaTokenizer)
 
 from models import Model
-from utils import acc_and_f1, TextDataset, convert_examples_to_features
+from utils import acc_and_f1, TextDataset, SingleDocDataset, convert_examples_to_features
 import multiprocessing
 cpu_cont = multiprocessing.cpu_count()
 
@@ -107,23 +107,20 @@ def prepare_test_json(args, model, tokenizer):
     with open(output_path, 'r') as f:
         results = json.load(f)
 
-    feat = convert_examples_to_features({
-        'label': 0, 'code': '', 'idx': '',
-        'doc': args.query
-    }, tokenizer, args)
-    label = torch.tensor(feat.label)
-    _, nl_vec = model(
-        torch.tensor(feat.code_ids),
-        torch.tensor(feat.nl_ids),
-        torch.tensor(feat.label),
-        return_vec=True
-    )
+    dataset = SingleDocDataset(tokenizer, args, args.query)
+    dataloader = DataLoader(dataset, pin_memory=True)
+    for batch in dataloader:
+        code_inputs = batch[0].to(args.device)
+        nl_inputs = batch[1].to(args.device)
+        labels = batch[2].to(args.device)
+        with torch.no_grad():
+            _, nl_vec = model(code_inputs, nl_inputs, labels, return_vec=True)
 
     best_idx = -1
     best_logit = 0.0
     for idx, result in enumerate(results):
         code_vec = torch.tensor(result['cluster_center'])
-        logits, _, _ = model(code_vec, nl_vec, label, use_input=True)
+        logits, _, _ = model(code_vec, nl_vec, labels, use_input=True)
         logit = logits.squeeze().numpy().tolist()[0]
         print(logit)
         if logit > best_logit:
