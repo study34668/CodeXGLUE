@@ -8,7 +8,7 @@ import tqdm
 dataset_name = 'staqc'
 title_data = pickle.load(open('qid_to_title.pickle', 'rb'))
 code_data = pickle.load(open('qid_to_code.pickle', 'rb'))
-train_num_negative = 2
+train_num_negative = 7
 valid_num_negative = 0
 test_num_negative = 0
 
@@ -68,7 +68,7 @@ random.seed(1)
 train_data = get_data_from_txt('{}_train.txt'.format(dataset_name), train_num_negative)
 valid_data = get_data_from_txt('{}_valid.txt'.format(dataset_name), valid_num_negative)
 test_data = get_data_from_txt('{}_test.txt'.format(dataset_name), test_num_negative)
-query_data = get_data_from_txt('{}_query.txt'.format(dataset_name), 0)
+query_data = get_data_from_txt('{}_train.txt'.format(dataset_name), 0)
 save_data_to_json(train_data, 'train_{}_{}.json'.format(dataset_name, train_num_negative))
 save_data_to_json(valid_data, 'valid_{}_{}.json'.format(dataset_name, valid_num_negative))
 save_data_to_json(test_data, 'test_{}_{}.json'.format(dataset_name, test_num_negative))

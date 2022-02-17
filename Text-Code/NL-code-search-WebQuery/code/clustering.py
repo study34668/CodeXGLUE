@@ -137,7 +137,7 @@ def prepare_test_json(args, model, tokenizer):
     with open(test_data_path, 'r') as f:
         data = json.load(f)
     for js in data:
-        if idx_map[js['idx']]:
+        if js['idx'] in idx_map:
             js['doc'] = args.query
             output_js.append(js)
     with open(output_test_file_path, 'w') as f:
