@@ -119,12 +119,11 @@ def prepare_test_json(args, model, tokenizer):
     best_idx = -1
     best_logit = 0.0
     for idx, result in enumerate(results):
-        print(nl_vec.size())
         code_vec = torch.tensor(result['cluster_center']).unsqueeze(0)
-        print(code_vec.size())
-        logits, _, _ = model(code_vec, nl_vec, labels, use_input=True)
-        logit = logits.squeeze().numpy().tolist()[0]
-        print(logit)
+        with torch.no_grad():
+            logits, _, _ = model(code_vec, nl_vec, labels, use_input=True)
+            logit = float(logits.squeeze().numpy().tolist()[0])
+            print(logit)
         if logit > best_logit:
             best_logit = logit
             best_idx = idx
