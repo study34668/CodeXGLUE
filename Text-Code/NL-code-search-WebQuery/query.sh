@@ -26,6 +26,8 @@ python code/run_classifier.py \
 
 python code/clustering.py \
 	--data_dir ./data \
+  --output_dir ./model_staqc \
+	--pred_model_dir checkpoint-best-aver \
 	--test_file query_staqc_0.json \
 	--prediction_file evaluator/staqc_query_predictions.txt \
 	--output_answer
