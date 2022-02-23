@@ -124,12 +124,15 @@ def prepare_test_json(args, model, tokenizer):
             logits, _, _ = model(code_vec, nl_vec, labels, use_input=True)
             logit = float(logits.squeeze().numpy().tolist())
             print(logit)
+        if logit < 0.2 or logit > 0.98:
+            continue
         if logit > best_logit:
             best_logit = logit
             best_idx = idx
     idx_map = {}
-    for idx in results[best_idx]['idxes']:
-        idx_map[idx] = True
+    if best_idx != -1:
+        for idx in results[best_idx]['idxes']:
+            idx_map[idx] = True
 
     test_data_path = os.path.join(args.data_dir, args.test_file)
     output_test_file_path = os.path.join(args.data_dir, args.output_test_file)
@@ -325,7 +328,11 @@ def main():
                 })
 
         list.sort(reverse=True, key=get_logit)
-        for i in range(10):
+        if len(list) == 0:
+            print("******************************")
+            print("*******NO ANSWER FOUND********")
+            print("******************************")
+        for i in range(min(10, len(list))):
             print("******" + str(list[i]['logit']) + "******")
             print(code_data[list[i]['pid']])
             print("******************************")
