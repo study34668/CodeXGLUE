@@ -35,6 +35,10 @@ class Model(PreTrainedModel):
             outputs = self.encoder(inputs, attention_mask=inputs.ne(1))[1]
             code_vec = outputs[:bs]
             nl_vec = outputs[bs:]
+            scores = (nl_vec[:, None, :] * code_vec[None, :, :]).sum(-1)
+            print(code_vec)
+            print(nl_vec)
+            print(scores)
             if return_vec:
                 return code_vec, nl_vec
         else:
