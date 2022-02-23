@@ -30,6 +30,8 @@ class Model(PreTrainedModel):
 
     def forward(self, code_inputs, nl_inputs, labels, return_vec=False, use_input=False):
         if not use_input:
+            outputs = self.encoder(code_inputs, attention_mask=code_inputs.ne(1))
+            print(outputs)
             code_vec = self.encoder(code_inputs, attention_mask=code_inputs.ne(1))[1]
             nl_vec = self.encoder(nl_inputs, attention_mask=nl_inputs.ne(1))[1]
             if return_vec:
