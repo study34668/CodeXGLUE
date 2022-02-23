@@ -19,6 +19,6 @@ nohup python code/run_classifier.py \
 	--encoder_name_or_path microsoft/codebert-base \
 	--n_cpu 1 \
 	--num_workers 0 \
-	--seed 668668 2>&1 | tee log/train.log &
+	--seed 2077 2>&1 | tee log/train.log &
 
 jobs -l > log/pid.log
