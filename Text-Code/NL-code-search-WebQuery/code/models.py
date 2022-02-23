@@ -35,12 +35,6 @@ class Model(PreTrainedModel):
             outputs = self.encoder(inputs, attention_mask=inputs.ne(1))[1]
             code_vec = outputs[:bs]
             nl_vec = outputs[bs:]
-            scores = (nl_vec[:, None, :] * code_vec[None, :, :]).sum(-1)
-            loss_fct = CrossEntropyLoss()
-            loss = loss_fct(scores, torch.arange(bs, device=scores.device))
-            print(bs)
-            print(scores)
-            print(loss)
             if return_vec:
                 return code_vec, nl_vec
         else:
