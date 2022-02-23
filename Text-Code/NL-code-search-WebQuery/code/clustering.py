@@ -116,6 +116,7 @@ def prepare_test_json(args, model, tokenizer):
         with torch.no_grad():
             _, nl_vec = model(code_inputs, nl_inputs, labels, return_vec=True)
 
+    spare_idx = -1
     best_idx = -1
     best_logit = 0.0
     for idx, result in enumerate(results):
@@ -124,14 +125,18 @@ def prepare_test_json(args, model, tokenizer):
             logits, _, _ = model(code_vec, nl_vec, labels, use_input=True)
             logit = float(logits.squeeze().numpy().tolist())
             print(logit)
-        if logit < 0.2 or logit > 0.98:
-            continue
         if logit > best_logit:
+            if logit < 0.2 or logit > 0.98:
+                spare_idx = idx
+                continue
             best_logit = logit
             best_idx = idx
     idx_map = {}
     if best_idx != -1:
         for idx in results[best_idx]['idxes']:
+            idx_map[idx] = True
+    else:
+        for idx in results[spare_idx]['idxes']:
             idx_map[idx] = True
 
     test_data_path = os.path.join(args.data_dir, args.test_file)
