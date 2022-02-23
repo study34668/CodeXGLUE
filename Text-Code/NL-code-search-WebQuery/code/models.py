@@ -30,10 +30,11 @@ class Model(PreTrainedModel):
 
     def forward(self, code_inputs, nl_inputs, labels, return_vec=False, use_input=False):
         if not use_input:
-            outputs = self.encoder(code_inputs, attention_mask=code_inputs.ne(1))
-            print(outputs)
-            code_vec = self.encoder(code_inputs, attention_mask=code_inputs.ne(1))[1]
-            nl_vec = self.encoder(nl_inputs, attention_mask=nl_inputs.ne(1))[1]
+            bs = code_inputs.shape[0]
+            inputs = torch.cat((code_inputs, nl_inputs), 0)
+            outputs = self.encoder(inputs, attention_mask=inputs.ne(1))[1]
+            code_vec = outputs[:bs]
+            nl_vec = outputs[bs:]
             if return_vec:
                 return code_vec, nl_vec
         else:
