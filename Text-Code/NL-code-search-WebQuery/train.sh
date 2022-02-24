@@ -9,9 +9,9 @@ nohup python code/run_classifier.py \
 	--per_gpu_train_batch_size 8 \
 	--per_gpu_eval_batch_size 8 \
 	--learning_rate 1e-5 \
-	--num_train_epochs 3 \
+	--num_train_epochs 2 \
 	--gradient_accumulation_steps 1 \
-	--warmup_steps 1000 \
+	--warmup_steps 100 \
 	--save_steps 2000 \
 	--evaluate_during_training \
 	--data_dir ./data/ \
