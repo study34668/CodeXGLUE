@@ -328,7 +328,7 @@ def test(args, model, tokenizer):
     logger.info("***** Running Test *****")
     with open(args.prediction_file,'w') as f:
         for example, logit, pred in zip(eval_dataset.examples, all_logits.tolist(), all_predictions.tolist()):
-            f.write(example.idx+'\t'+str(float(logit))+'\t'+str(int(pred))+'\n')
+            f.write(str(example.idx)+'\t'+str(float(logit))+'\t'+str(int(pred))+'\n')
 
 
 def main():
